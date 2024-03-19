@@ -19,9 +19,9 @@ import { useUserStore } from '~/stores/user';
 const userStore = useUserStore()
 // const user = useSupabaseUse()
 
-let posts = ref([])
-let isPosts = ref(true)
-let isLoading = ref(false)
+let posts = ref([]);
+let isPosts = ref(true);
+let isLoading = ref(false);
 
 onBeforeMount(() => {
   posts.value = [
@@ -32,6 +32,5 @@ onBeforeMount(() => {
       picture: 'https://placehold.co/500'
     }
   ]
-})
-
+});
 </script>

@@ -28,7 +28,7 @@
         <Icon name="material-symbols:edit-square-outline-rounded" class="mb-1" size="32" color="#ffffff" />
       </button>
       <button
-        @click="userStore.usLogoutOverlay = true"
+        @click="userStore.isLogoutOverlay = true"
         class="w-full h-full"
       >
         <Icon name="ph:sign-out" class="mb-1" size="32" color="#ffffff" />
