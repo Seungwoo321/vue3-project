@@ -16,9 +16,9 @@
 
       <div id="Post" class="z-40 bottom-0 max-h-[100vh-200px] w-full px-3 max-w-[500px] mx-auto">
         <div class="py-2 w-full">
-          <div class="flex items-center text-white">
-            <img class="rounded-full h-[35px]" src="https://picsum.photos/id/223/50" />
-            <div class="ml-2 font-semibold text-[18px]">John Weeks Dev</div>
+          <div v-if="user" class="flex items-center text-white">
+            <img class="rounded-full h-[35px]" :src="user.identities[0].identity_data.avatar_url" />
+            <div class="ml-2 font-semibold text-[18px]">{{ user.identities[0].identity_data.user_name }}</div>
           </div>
         </div>
 
@@ -65,6 +65,7 @@
       <button
         v-if="text"
         :disabled="isLoading"
+        @click="createPost()"
         class="fixed bottom-0 font-bold text-lg w-full p-2 bg-black inline-block float-right pt-4 border-t border-t-gray-700"
         :class="isLoading ? 'text-gray-600' : 'text-blue-600'"
       >
@@ -81,6 +82,9 @@
 import { v4 as uuidv4 } from 'uuid'
 import { useUserStore } from '~/stores/user';
 const userStore = useUserStore();
+
+const client = useSupabaseClient();
+const user = useSupabaseUser();
 
 let text = ref(null);
 let isLoading = ref(null);
@@ -105,6 +109,55 @@ const clearData = () => {
 const onChange = () => {
   fileDisplay.value = URL.createObjectURL(file.value.files[0]);
   fileData.value = file.value.files[0];
+};
+
+const createPost = async () => {
+  let dataOut = null;
+  let errorOut = null;
+
+  isLoading.value = true;
+
+  if (fileData.value) {
+    const { data, error } = await client
+      .storage
+      .from('threads-clone-files')
+      .upload(`${uuidv4()}.jpg`, fileData.value)
+    
+    dataOut = data;
+    errorOut = error;
+  }
+
+  if (errorOut) {
+    console.log(errorOut)
+    return errorOut;
+  }
+
+  let pic = '';
+  if (dataOut) {
+    pic = dataOut.path ? dataOut.path : '';
+  }
+
+  try {
+    await useFetch(`/api/create-post`, {
+      method: 'POST',
+      body: {
+        userId: user.value.identities[0].user_id,
+        name: user.value.identities[0].identity_data.user_name,
+        image: user.value.identities[0].identity_data.avatar_url,
+        text: text.value,
+        picture: pic
+      }
+    });
+
+    await userStore.getAllPosts();
+    userStore.isMenuOverlay = false;
+
+    clearData();
+    isLoading.value = false;
+  } catch (error) {
+    console.log(error);
+    isLoading.value = false;
+  }
 };
 
 </script>

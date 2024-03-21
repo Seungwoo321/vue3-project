@@ -9,7 +9,10 @@
         <Icon name="mdi:close" size="25" />
       </button>
       <div class="border-b border-b-gray-700 my-1" />
-      <button class="flex items-center justify-between bg-black w-full p-3">
+      <button
+        @click="logout()"
+        class="flex items-center justify-between bg-black w-full p-3"
+      >
         <div>Log Out</div>
         <Icon name="ph:sign-out" size="25" />
       </button>
@@ -20,13 +23,13 @@
 <script setup>
 import { useUserStore } from '~/stores/user';
 const userStore = useUserStore();
-// const client = useSupabaseClient();
+const client = useSupabaseClient();
 
-// const logout = () => {
-//   client.auth.signOut();
-//   userStore.isLogoutOverlay = false;
-//   return navigateTo('/');
-// }
+const logout = () => {
+  client.auth.signOut();
+  userStore.isLogoutOverlay = false;
+  return navigateTo('/');
+}
 </script>
 
 <style lang="scss" scoped>

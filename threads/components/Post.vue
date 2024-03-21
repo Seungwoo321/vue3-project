@@ -10,7 +10,11 @@
             </div>
         </div>
 
-        <div @click="isMenu = !isMenu" class="relative">
+        <div
+          v-if="user && user.identities && user.identities[0].user_id === post.userId"
+          @click="isMenu = !isMenu"
+          class="relative"
+        >
           <button
             :disabled="isDeleting"
             class="flex items-center text-white p-1 h-[24px] w-[24px] hover:bg-gray-800 rounded-full cursor-pointer"
@@ -21,7 +25,10 @@
           </button>
           
           <div v-if="isMenu" class="absolute border border-gray-600 right-0 z-20 mt-1 rounded">
-            <button class="flex items-center rounded gap-2 text-red-500 justify-between bg-black w-full pl-4 pr-3 py-1 hoer:bg-gray-900">
+            <button
+              @click="deletePost(post.id, post.picture)"
+              class="flex items-center rounded gap-2 text-red-500 justify-between bg-black w-full pl-4 pr-3 py-1 hoer:bg-gray-900"
+            >
               <div>Delete</div>
               <Icon name="solar:trash-bin-trash-broken" size="20" />
             </button>
@@ -41,7 +48,7 @@
           <img
             v-if="post && post.picture"
             class="mx-auto w-full mt-2 pr-2 rounded"
-            :src="post.picture"
+            :src="runtimeConfig.public.bucketUrl + post.picture"
           />
 
           <div class="absolute mt-2 w-full ml-2">
@@ -93,5 +100,47 @@ let isDeleting = ref(false)
 
 const emit = defineEmits(['isDeleted'])
 const props = defineProps({ post: Object });
+
+const client = useSupabaseClient();
+const user = useSupabaseUser();
+
+const hasLikedComputed = computed(() => {
+  if (!user.value) return;
+  let res = false;
+
+  props.post.like.forEach(like => {
+    if (like.userId === user.value.identities[0].user_id && like.postId === props.post.id) {
+      res = true;
+    }
+  });
+
+  return res;
+});
+
+const deletePost = async (id, picture) => {
+  let res = confirm('Are you suire you want to delete this post?');
+
+  if (!res) return;
+
+  try {
+    isMenu.value = false;
+    isDeleting.value = true;
+
+    const { data, error } = await client
+      .storage
+      .from('threads-clone-files')
+      .remove([picture]);
+
+    await useFetch(`/api/delete-post/${id}`, {
+      method: 'DELETE'
+    });
+    emit('isDeleted', true);
+
+    isDeleting.value = false;
+  } catch (error) {
+    console.log(error);
+    isDeleting.value = false;
+  }
+};
 
 </script>

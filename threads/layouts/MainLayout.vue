@@ -16,7 +16,6 @@
     >
       <div class="flex w-full max-w-[500px] mx-auto flex items-center justify-around">
         <button
-          @click="navigateTo('/')"
           class="w-full h-full"
         >
           <Icon name="material-symbols:home-outline" size="35" color="#ffffff" />
