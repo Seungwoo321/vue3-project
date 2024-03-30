@@ -138,7 +138,7 @@ const createPost = async () => {
   }
 
   try {
-    await useFetch(`/api/create-post`, {
+    await $fetch(`/api/create-post`, {
       method: 'POST',
       body: {
         userId: user.value.identities[0].user_id,

@@ -4,7 +4,7 @@
       <div class="mx-auto max-w-[500px] overflow-hidden">
         <div id="Posts" class="px-4 max-w-[600px] mx-auto">
           <div v-if="isPosts" v-for="post in posts" :key="post">
-            <Post :post="post" @isDeleted="posts = []" />
+            <Post :post="post" @isDeleted="posts = userStore.getAllPosts()" />
           </div>
           <div v-else>
             <client-only>
@@ -22,6 +22,7 @@
               </div>
             </client-only>
           </div>
+          <div class="mt-60" />
         </div>
       </div>
     </div>
@@ -57,18 +58,22 @@ onBeforeMount(async () => {
 
 onMounted(() => {
   watchEffect(() => {
+    posts.value = userStore.posts;
     if (userStore.posts && userStore.posts.length >= 1) {
-      posts.value = userStore.posts;
       isPosts.value = true;
+    } else {
+      isPosts.value = false
     }
   });
 });
 
 watch(() => posts.value, () => {
-    if (userStore.posts && userStore.posts.length >= 1) {
-      posts.value = userStore.posts;
-      isPosts.value = true;
-    }
+  posts.value = userStore.posts;
+  if (userStore.posts && userStore.posts.length >= 1) {
+    isPosts.value = true;
+  } else {
+    isPosts.value = false
+  }
 }, {
   deep: true
 });
